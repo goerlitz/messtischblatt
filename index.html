@@ -4,11 +4,12 @@
     <title>Meßtischblatt 4670 Festenberg</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <meta http-equiv='imagetoolbar' content='no'/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <style type="text/css">
         *, *::before, *::after { box-sizing: border-box; }
         html, body { overflow: hidden; padding: 0; margin: 0; height: 100%; width: 100%; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #1a1a2e; }
         #header { height: 52px; display: flex; align-items: center; justify-content: center; padding: 0 20px; background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%); border-bottom: 1px solid #0f3460; }
-        #header h1 { margin: 0; font-size: 16px; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: #b0bec5; }
+        #header h1 { margin: 0; font-size: 18px; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: #b0bec5; text-align: center; }
         #header h1 span { color: #4fc3f7; font-weight: 700; letter-spacing: 0.08em; }
         #map { height: calc(100% - 52px - 32px); position: relative; }
         #footer {
@@ -24,21 +25,6 @@
         }
         #footer a { color: #4fc3f7; text-decoration: none; }
         #footer a:hover { text-decoration: underline; }
-        .custom-mouse-position {
-            position: absolute;
-            bottom: 8px;
-            left: 8px;
-            z-index: 1000;
-            background: rgba(22, 33, 62, 0.75);
-            backdrop-filter: blur(6px);
-            border: 1px solid #0f3460;
-            border-radius: 6px;
-            padding: 3px 10px;
-            font-size: 11px;
-            color: #6e8090;
-            letter-spacing: 0.04em;
-            pointer-events: none;
-        }
         #opacity-control {
             position: absolute;
             bottom: 10px;
@@ -82,6 +68,10 @@
             background-color: #16213e !important;
             border: 1px solid #0f3460 !important;
             color: #b0bec5 !important;
+            width: 32px !important;
+            height: 32px !important;
+            font-size: 18px !important;
+            line-height: 32px !important;
         }
         .ol-zoom .ol-zoom-in:hover,
         .ol-zoom .ol-zoom-out:hover {
@@ -89,6 +79,19 @@
             color: #4fc3f7 !important;
         }
         .ol-zoom { top: 10px; left: 10px; }
+
+        @media (max-width: 768px) {
+            #header { height: 60px; }
+            #header h1 { font-size: 22px; }
+            #map { height: calc(100% - 60px - 32px); }
+            .ol-zoom .ol-zoom-in,
+            .ol-zoom .ol-zoom-out {
+                width: 44px !important;
+                height: 44px !important;
+                font-size: 24px !important;
+                line-height: 44px !important;
+            }
+        }
 
         /* LayerSwitcher dark theme */
         .layer-switcher { top: 10px; right: 10px; }
@@ -145,7 +148,6 @@
 <body>
     <div id="header"><h1><span>Meßtischblatt</span> 4670 Festenberg</h1></div>
     <div id="map" class="map">
-        <div id="mouse-position"></div>
         <div id="opacity-control">
             <label for="opacity-slider">Transparenz</label>
             <input id="opacity-slider" type="range" min="0" max="100" value="70">
@@ -157,15 +159,6 @@
         Topographische Karte 4670 = 2708. Festenberg, 1:25&thinsp;000, 1938 &mdash; Kartensammlung Herder-Institut, Signatur K 3 II L 58 &mdash; <a href="https://dbs.herder-institut.de/karten/id/K3IIL58:4670" target="_blank">dbs.herder-institut.de</a>
     </div>
     <script type="text/javascript">
-        var mousePositionControl = new ol.control.MousePosition({
-            className: 'custom-mouse-position',
-            target: document.getElementById('mouse-position'),
-            projection: 'EPSG:4326',
-            coordinateFormat: function(coord) {
-                return ol.coordinate.toStringHDMS(coord, 1);
-            },
-            undefinedHTML: '&nbsp;'
-        });
         var overlayLayer = new ol.layer.Tile({
             opacity: 0.7,
             extent: [1927123.109356991, 6670434.3906214433, 1951510.3987293371, 6695434.5761959879],
@@ -178,7 +171,7 @@
             })
         });
         var map = new ol.Map({
-            controls: ol.control.defaults.defaults().extend([mousePositionControl]),
+            controls: ol.control.defaults.defaults(),
             target: 'map',
             layers: [
                 new ol.layer.Group({
