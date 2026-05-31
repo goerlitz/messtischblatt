@@ -1,16 +1,141 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>output_3857.tif</title>
+    <title>Meßtischblatt 4670 Festenberg</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <meta http-equiv='imagetoolbar' content='no'/>
-    <style type="text/css"> v\:* {behavior:url(#default#VML);}
-        html, body { overflow: hidden; padding: 0; height: 100%; width: 100%; font-family: 'Lucida Grande',Geneva,Arial,Verdana,sans-serif; }
-        body { margin: 10px; background: #fff; }
-        h1 { margin: 0; padding: 6px; border:0; font-size: 20pt; }
-        #header { height: 43px; padding: 0; background-color: #eee; border: 1px solid #888; }
-        #subheader { height: 12px; text-align: right; font-size: 10px; color: #555;}
-        #map { height: 90%; border: 1px solid #888; }
+    <style type="text/css">
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { overflow: hidden; padding: 0; margin: 0; height: 100%; width: 100%; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #1a1a2e; }
+        #header { height: 52px; display: flex; align-items: center; justify-content: center; padding: 0 20px; background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%); border-bottom: 1px solid #0f3460; }
+        #header h1 { margin: 0; font-size: 16px; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: #b0bec5; }
+        #header h1 span { color: #4fc3f7; font-weight: 700; letter-spacing: 0.08em; }
+        #map { height: calc(100% - 52px - 32px); position: relative; }
+        #footer {
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #16213e;
+            border-top: 1px solid #0f3460;
+            font-size: 11px;
+            color: #6e8090;
+            letter-spacing: 0.03em;
+        }
+        #footer a { color: #4fc3f7; text-decoration: none; }
+        #footer a:hover { text-decoration: underline; }
+        .custom-mouse-position {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            z-index: 1000;
+            background: rgba(22, 33, 62, 0.75);
+            backdrop-filter: blur(6px);
+            border: 1px solid #0f3460;
+            border-radius: 6px;
+            padding: 3px 10px;
+            font-size: 11px;
+            color: #6e8090;
+            letter-spacing: 0.04em;
+            pointer-events: none;
+        }
+        #opacity-control {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(22, 33, 62, 0.85);
+            backdrop-filter: blur(6px);
+            border: 1px solid #0f3460;
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #e0e0e0;
+            font-size: 13px;
+        }
+        #opacity-control label { white-space: nowrap; }
+        #opacity-slider {
+            width: 160px;
+            accent-color: #4fc3f7;
+            cursor: pointer;
+        }
+        #opacity-value { min-width: 32px; text-align: right; color: #4fc3f7; font-weight: 600; }
+        #reset-btn {
+            background: #0f3460;
+            border: 1px solid #4fc3f7;
+            border-radius: 5px;
+            color: #4fc3f7;
+            font-size: 12px;
+            padding: 3px 10px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        #reset-btn:hover { background: #1a5276; }
+
+        /* OL zoom button style */
+        .ol-zoom .ol-zoom-in,
+        .ol-zoom .ol-zoom-out {
+            background-color: #16213e !important;
+            border: 1px solid #0f3460 !important;
+            color: #b0bec5 !important;
+        }
+        .ol-zoom .ol-zoom-in:hover,
+        .ol-zoom .ol-zoom-out:hover {
+            background-color: #0f3460 !important;
+            color: #4fc3f7 !important;
+        }
+        .ol-zoom { top: 10px; left: 10px; }
+
+        /* LayerSwitcher dark theme */
+        .layer-switcher { top: 10px; right: 10px; }
+        .layer-switcher button {
+            display: none !important;
+            background-color: #16213e !important;
+            border: 1px solid #0f3460 !important;
+            border-radius: 6px;
+            color: #b0bec5 !important;
+            font-size: 18px;
+            width: 32px;
+            height: 32px;
+        }
+        .layer-switcher button:hover {
+            background-color: #0f3460 !important;
+            color: #4fc3f7 !important;
+        }
+        .layer-switcher.shown button { border-radius: 6px 6px 0 0; }
+        .layer-switcher.shown .panel {
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid #0f3460;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            padding: 0 4px 2px 4px;
+            min-width: 140px;
+        }
+        .layer-switcher .panel li { font-size: 13px; }
+        .layer-switcher ul { margin: 0.8em 0.4em !important; }
+        .layer-switcher .panel ul ul { margin: 0.1em 0 0 0 !important; }
+        .layer-switcher .panel li label { color: #b0bec5; letter-spacing: 0.03em; }
+        .layer-switcher .panel li label:hover { color: #4fc3f7; }
+        .layer-switcher .panel li.group > label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #4fc3f7;
+            font-weight: 600;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+        .layer-switcher input[type="radio"],
+        .layer-switcher input[type="checkbox"] {
+            accent-color: #4fc3f7;
+            top: 50%;
+            transform: translateY(-50%);
+        }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.css" type="text/css">
     <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.js"></script>
@@ -18,54 +143,85 @@
     <link rel="stylesheet" href="https://unpkg.com/ol-layerswitcher@4.1.1/src/ol-layerswitcher.css" />
 </head>
 <body>
-    <div id="header"><h1>output_3857.tif</h1></div>
-    <div id="subheader">Generated by <a href="https://gdal.org/programs/gdal_raster_tile.html">gdal raster tile</a>&nbsp;&nbsp;&nbsp;&nbsp;</div>
-    <div id="map" class="map"></div>
-    <div id="mouse-position"></div>
+    <div id="header"><h1><span>Meßtischblatt</span> 4670 Festenberg</h1></div>
+    <div id="map" class="map">
+        <div id="mouse-position"></div>
+        <div id="opacity-control">
+            <label for="opacity-slider">Transparenz</label>
+            <input id="opacity-slider" type="range" min="0" max="100" value="70">
+            <span id="opacity-value">70%</span>
+            <button id="reset-btn">Reset</button>
+        </div>
+    </div>
+    <div id="footer">
+        Topographische Karte 4670 = 2708. Festenberg, 1:25&thinsp;000, 1938 &mdash; Kartensammlung Herder-Institut, Signatur K 3 II L 58 &mdash; <a href="https://dbs.herder-institut.de/karten/id/K3IIL58:4670" target="_blank">dbs.herder-institut.de</a>
+    </div>
     <script type="text/javascript">
         var mousePositionControl = new ol.control.MousePosition({
             className: 'custom-mouse-position',
             target: document.getElementById('mouse-position'),
+            projection: 'EPSG:4326',
+            coordinateFormat: function(coord) {
+                return ol.coordinate.toStringHDMS(coord, 1);
+            },
             undefinedHTML: '&nbsp;'
+        });
+        var overlayLayer = new ol.layer.Tile({
+            opacity: 0.7,
+            extent: [1927123.109356991, 6670434.3906214433, 1951510.3987293371, 6695434.5761959879],
+            source: new ol.source.XYZ({
+                attributions: '',
+                minZoom: 8,
+                maxZoom: 16,
+                url: './{z}/{x}/{y}.webp',
+                tileSize: [256, 256]
+            })
         });
         var map = new ol.Map({
             controls: ol.control.defaults.defaults().extend([mousePositionControl]),
             target: 'map',
             layers: [
                 new ol.layer.Group({
-                        title: 'Base maps',
-                        layers: [
-                            new ol.layer.Tile({
-                                title: 'OpenStreetMap',
-                                type: 'base',
-                                visible: true,
-                                source: new ol.source.OSM()
-                            }),
-                        ]
-                }),new ol.layer.Group({
-                    title: 'Overlay',
+                    title: 'Base maps',
                     layers: [
                         new ol.layer.Tile({
-                            title: 'Overlay',
-                            // opacity: 0.7,
-                            extent: [1927123.109356991, 6670434.3906214433,1951510.3987293371, 6695434.5761959879],
-                            source: new ol.source.XYZ({
-                                attributions: '',
-                                minZoom: 8,
-                                maxZoom: 16,
-                                url: './{z}/{x}/{y}.webp',
-                                tileSize: [256, 256]
-                            })
+                            title: 'OpenStreetMap',
+                            type: 'base',
+                            visible: true,
+                            source: new ol.source.OSM()
                         }),
                     ]
                 }),
             ],
             view: new ol.View({
                 center: [1939316.7540431642, 6682934.4834087156],
-                zoom: 8,
+                zoom: 12,
+                maxZoom: 16,
             })
         });
+        map.getView().fit([1927123.109356991, 6670434.3906214433, 1951510.3987293371, 6695434.5761959879], {
+            padding: [20, 20, 20, 20]
+        });
+        map.addLayer(overlayLayer);
         map.addControl(new ol.control.LayerSwitcher());
+
+        var slider = document.getElementById('opacity-slider');
+        var opacityValue = document.getElementById('opacity-value');
+        var OVERLAY_EXTENT = [1927123.109356991, 6670434.3906214433, 1951510.3987293371, 6695434.5761959879];
+        var DEFAULT_OPACITY = 70;
+
+        slider.addEventListener('input', function() {
+            var val = parseInt(this.value);
+            overlayLayer.setOpacity(val / 100);
+            opacityValue.textContent = val + '%';
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', function() {
+            slider.value = DEFAULT_OPACITY;
+            opacityValue.textContent = DEFAULT_OPACITY + '%';
+            overlayLayer.setOpacity(DEFAULT_OPACITY / 100);
+            map.getView().fit(OVERLAY_EXTENT, { padding: [20, 20, 20, 20], duration: 400 });
+        });
     </script>
 </body>
 </html>
