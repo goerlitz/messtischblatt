@@ -196,6 +196,41 @@
             padding: [20, 20, 20, 20]
         });
         map.addLayer(overlayLayer);
+
+        var kreisLayer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                url: './kreisgrenze.geojson',
+                format: new ol.format.GeoJSON({
+                    dataProjection: 'EPSG:3857',
+                    featureProjection: 'EPSG:3857'
+                })
+            }),
+            style: [
+                new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: 'rgba(200, 0, 0, 0.2)',
+                        width: 10
+                    })
+                }),
+                new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: 'rgba(0, 0, 0, 0.5)',
+                        width: 1.5,
+                        lineDash: [12, 4, 2, 4]
+                    })
+                })
+            ]
+        });
+        map.addLayer(kreisLayer);
+
+        kreisLayer.getSource().once('change', function() {
+            if (kreisLayer.getSource().getState() === 'ready') {
+                map.getView().fit(kreisLayer.getSource().getExtent(), {
+                    padding: [20, 20, 20, 20]
+                });
+            }
+        });
+
         map.addControl(new ol.control.LayerSwitcher());
 
         var slider = document.getElementById('opacity-slider');
