@@ -216,12 +216,38 @@
                     stroke: new ol.style.Stroke({
                         color: 'rgba(0, 0, 0, 0.5)',
                         width: 1.5,
-                        lineDash: [12, 4, 2, 4]
+                        lineDash: [12, 4, 12, 4, 2, 4]
                     })
                 })
             ]
         });
         map.addLayer(kreisLayer);
+
+        var landesLayer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                url: './landesgrenze.geojson',
+                format: new ol.format.GeoJSON({
+                    dataProjection: 'EPSG:3857',
+                    featureProjection: 'EPSG:3857'
+                })
+            }),
+            style: [
+                new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: 'rgba(255, 100, 180, 0.25)',
+                        width: 12
+                    })
+                }),
+                new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: 'rgba(0, 0, 0, 0.5)',
+                        width: 2.5,
+                        lineDash: [12, 6]
+                    })
+                })
+            ]
+        });
+        map.addLayer(landesLayer);
 
         kreisLayer.getSource().once('change', function() {
             if (kreisLayer.getSource().getState() === 'ready') {
