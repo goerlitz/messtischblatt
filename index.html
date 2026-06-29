@@ -161,7 +161,6 @@
     <script type="text/javascript">
         var overlayLayer = new ol.layer.Tile({
             opacity: 0.7,
-            extent: [1927123.109356991, 6670434.3906214433, 1951510.3987293371, 6695434.5761959879],
             source: new ol.source.XYZ({
                 attributions: '',
                 minZoom: 8,
@@ -192,10 +191,17 @@
                 maxZoom: 16,
             })
         });
-        map.getView().fit([1927123.109356991, 6670434.3906214433, 1951510.3987293371, 6695434.5761959879], {
-            padding: [20, 20, 20, 20]
-        });
         map.addLayer(overlayLayer);
+
+        // Load extent from tiles-extent.json (regenerate with: python3 update-extent.py)
+        fetch('./tiles-extent.json')
+            .then(function(r) { return r.json(); })
+            .then(function(meta) {
+                overlayLayer.setExtent(meta.extent);
+                overlayLayer.getSource().setProperties({ minZoom: meta.minZoom, maxZoom: meta.maxZoom });
+                map.getView().fit(meta.extent, { padding: [20, 20, 20, 20] });
+                OVERLAY_EXTENT = meta.extent;
+            });
 
         var kreisLayer = new ol.layer.Vector({
             source: new ol.source.Vector({
@@ -251,7 +257,8 @@
 
         kreisLayer.getSource().once('change', function() {
             if (kreisLayer.getSource().getState() === 'ready') {
-                map.getView().fit(kreisLayer.getSource().getExtent(), {
+                OVERLAY_EXTENT = kreisLayer.getSource().getExtent();
+                map.getView().fit(OVERLAY_EXTENT, {
                     padding: [20, 20, 20, 20]
                 });
             }
@@ -261,7 +268,7 @@
 
         var slider = document.getElementById('opacity-slider');
         var opacityValue = document.getElementById('opacity-value');
-        var OVERLAY_EXTENT = [1927123.109356991, 6670434.3906214433, 1951510.3987293371, 6695434.5761959879];
+        var OVERLAY_EXTENT = null;
         var DEFAULT_OPACITY = 70;
 
         slider.addEventListener('input', function() {
@@ -274,7 +281,9 @@
             slider.value = DEFAULT_OPACITY;
             opacityValue.textContent = DEFAULT_OPACITY + '%';
             overlayLayer.setOpacity(DEFAULT_OPACITY / 100);
-            map.getView().fit(OVERLAY_EXTENT, { padding: [20, 20, 20, 20], duration: 400 });
+            if (OVERLAY_EXTENT) {
+                map.getView().fit(OVERLAY_EXTENT, { padding: [20, 20, 20, 20], duration: 400 });
+            }
         });
     </script>
 </body>
