@@ -93,65 +93,93 @@
             }
         }
 
-        /* LayerSwitcher dark theme */
-        .layer-switcher { top: 10px; right: 10px; }
-        .layer-switcher button {
-            background-color: #16213e !important;
-            border: 1px solid #0f3460 !important;
+        /* Custom layer panel (dark theme) */
+        #layer-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        #layer-toggle {
+            background: #16213e;
+            border: 1px solid #0f3460;
             border-radius: 6px;
-            color: #b0bec5 !important;
+            color: #b0bec5;
             font-size: 18px;
             width: 32px;
             height: 32px;
+            line-height: 30px;
+            text-align: center;
+            cursor: pointer;
         }
-        .layer-switcher button:hover {
-            background-color: #0f3460 !important;
-            color: #4fc3f7 !important;
-        }
-        .layer-switcher.shown button { border-radius: 6px 6px 0 0; }
-        .layer-switcher.shown .panel {
+        #layer-toggle:hover { background: #0f3460; color: #4fc3f7; }
+        #layer-list {
+            display: none;
+            margin-top: 4px;
             background: rgba(22, 33, 62, 0.95);
             backdrop-filter: blur(8px);
             border: 1px solid #0f3460;
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            padding: 0 4px 2px 4px;
-            min-width: 140px;
+            border-radius: 8px;
+            padding: 10px 14px;
+            min-width: 160px;
+            color: #b0bec5;
+            font-size: 13px;
         }
-        .layer-switcher .panel li { font-size: 13px; }
-        .layer-switcher ul { margin: 0.8em 0.4em !important; }
-        .layer-switcher .panel ul ul { margin: 0.1em 0 0 0 !important; }
-        .layer-switcher .panel li label { color: #b0bec5; letter-spacing: 0.03em; }
-        .layer-switcher .panel li label:hover { color: #4fc3f7; }
-        .layer-switcher .panel li.group > label {
+        #layer-list.open { display: block; }
+        .layer-group + .layer-group {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #0f3460;
+        }
+        .layer-group-title {
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: #4fc3f7;
             font-weight: 600;
-            display: inline-block;
-            padding-bottom: 10px;
+            margin-bottom: 6px;
         }
-        .layer-switcher input[type="radio"],
-        .layer-switcher input[type="checkbox"] {
-            accent-color: #4fc3f7;
-            top: 50%;
-            transform: translateY(-50%);
+        #layer-list label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 3px 0;
+            cursor: pointer;
+            letter-spacing: 0.03em;
         }
-        .layer-switcher .panel > ul > li.group:last-child {
-            border-top: 1px solid #0f3460;
-            margin-top: 6px;
-            padding-top: 2px;
+        #layer-list label:hover { color: #4fc3f7; }
+        #layer-list input[type="radio"] { accent-color: #4fc3f7; cursor: pointer; }
+        @media (max-width: 768px) {
+            #layer-toggle { width: 44px; height: 44px; font-size: 24px; line-height: 42px; }
         }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.css" type="text/css">
     <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.js"></script>
-    <script src="https://unpkg.com/ol-layerswitcher@4.1.1"></script>
-    <link rel="stylesheet" href="https://unpkg.com/ol-layerswitcher@4.1.1/src/ol-layerswitcher.css" />
 </head>
 <body>
     <div id="header"><h1><span>Meßtischblätter</span> Kreis Groß Wartenberg</h1></div>
     <div id="map" class="map">
+        <div id="layer-panel">
+            <button id="layer-toggle" title="Ebenen">&#9636;</button>
+            <div id="layer-list">
+                <div class="layer-group">
+                    <div class="layer-group-title">Topografisch</div>
+                    <label><input type="radio" name="overlay" value="topo25" checked> Meßtischblätter</label>
+                </div>
+                <div class="layer-group">
+                    <div class="layer-group-title">Demografisch</div>
+                    <label><input type="radio" name="overlay" value="census1910"> Census 1910</label>
+                </div>
+                <div class="layer-group">
+                    <div class="layer-group-title">Basiskarte</div>
+                    <label><input type="radio" name="base" value="osm" checked> OpenStreetMap</label>
+                    <label><input type="radio" name="base" value="off"> Aus</label>
+                </div>
+            </div>
+        </div>
         <div id="opacity-control">
             <label for="opacity-slider">Transparenz</label>
             <input id="opacity-slider" type="range" min="0" max="100" value="100">
@@ -187,30 +215,15 @@
                 tileSize: [256, 256]
             })
         });
+        var osmLayer = new ol.layer.Tile({
+            title: 'OpenStreetMap',
+            visible: true,
+            source: new ol.source.OSM()
+        });
         var map = new ol.Map({
             controls: ol.control.defaults.defaults(),
             target: 'map',
-            layers: [
-                new ol.layer.Group({
-                    title: 'Base maps',
-                    layers: [
-                        new ol.layer.Tile({
-                            title: 'OpenStreetMap',
-                            type: 'base',
-                            visible: true,
-                            source: new ol.source.OSM()
-                        }),
-                    ]
-                }),
-                new ol.layer.Group({
-                    title: 'Demografische Karten',
-                    layers: [census1910Layer]
-                }),
-                new ol.layer.Group({
-                    title: 'Topografische Karten',
-                    layers: [topo25Layer]
-                }),
-            ],
+            layers: [osmLayer, census1910Layer, topo25Layer],
             view: new ol.View({
                 center: [1939316.7540431642, 6682934.4834087156],
                 zoom: 12,
@@ -226,21 +239,6 @@
             topo25Layer.setOpacity(opacity);
             census1910Layer.setOpacity(opacity);
         }
-
-        function enforceSingleMapLayer(selectedLayer, otherLayer) {
-            if (selectedLayer.getVisible()) {
-                otherLayer.setVisible(false);
-            } else if (!otherLayer.getVisible()) {
-                selectedLayer.setVisible(true);
-            }
-        }
-
-        topo25Layer.on('change:visible', function() {
-            enforceSingleMapLayer(topo25Layer, census1910Layer);
-        });
-        census1910Layer.on('change:visible', function() {
-            enforceSingleMapLayer(census1910Layer, topo25Layer);
-        });
 
         // Load extent from tiles-extent.json (regenerate with: python3 update-extent.py)
         fetch('./tiles-extent.json')
@@ -315,10 +313,20 @@
             }
         });
 
-        map.addControl(new ol.control.LayerSwitcher({
-            reverse: true,
-            groupSelectStyle: 'none'
-        }));
+        // Custom layer panel: base map (with "off") + a single always-on overlay
+        document.getElementById('layer-toggle').addEventListener('click', function() {
+            document.getElementById('layer-list').classList.toggle('open');
+        });
+        document.querySelectorAll('#layer-panel input[type="radio"]').forEach(function(input) {
+            input.addEventListener('change', function() {
+                if (this.name === 'base') {
+                    osmLayer.setVisible(this.value === 'osm');
+                } else if (this.name === 'overlay') {
+                    topo25Layer.setVisible(this.value === 'topo25');
+                    census1910Layer.setVisible(this.value === 'census1910');
+                }
+            });
+        });
 
         var slider = document.getElementById('opacity-slider');
         var opacityValue = document.getElementById('opacity-value');
