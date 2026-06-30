@@ -151,6 +151,13 @@
             letter-spacing: 0.03em;
         }
         #layer-list label:hover { color: #4fc3f7; }
+        #layer-list .layer-name { display: flex; flex-direction: column; line-height: 1.25; }
+        #layer-list .layer-name small {
+            font-size: 10px;
+            font-weight: 400;
+            color: #6e8090;
+            letter-spacing: 0.02em;
+        }
         #layer-list input[type="radio"],
         #layer-list input[type="checkbox"] { accent-color: #4fc3f7; cursor: pointer; }
         @media (max-width: 768px) {
@@ -201,7 +208,7 @@
             <div id="layer-list">
                 <div class="layer-group">
                     <div class="layer-group-title">Topografisch</div>
-                    <label><input type="radio" name="overlay" value="topo25" checked> Meßtischblätter</label>
+                    <label><input type="radio" name="overlay" value="topo25" checked> <span class="layer-name">Meßtischblätter<small>1937–1940 · 1:25.000</small></span></label>
                 </div>
                 <div class="layer-group">
                     <div class="layer-group-title">Demografisch</div>
