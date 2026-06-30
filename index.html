@@ -42,6 +42,8 @@
             color: #e0e0e0;
             font-size: 13px;
         }
+        #transparency-group { display: flex; align-items: center; gap: 10px; }
+        #transparency-group.hidden { display: none; }
         #opacity-control label { white-space: nowrap; }
         #opacity-slider {
             width: 160px;
@@ -226,10 +228,12 @@
             </div>
         </div>
         <div id="opacity-control">
-            <label for="opacity-slider">Transparenz</label>
-            <input id="opacity-slider" type="range" min="0" max="100" value="100">
-            <span id="opacity-value">100%</span>
-            <button id="reset-btn">Reset</button>
+            <span id="transparency-group">
+                <label for="opacity-slider">Transparenz</label>
+                <input id="opacity-slider" type="range" min="0" max="100" value="100">
+                <span id="opacity-value">100%</span>
+            </span>
+            <button id="reset-btn" title="Auf das Kartengebiet einpassen">Einpassen</button>
         </div>
     </div>
     <div id="footer">
@@ -366,6 +370,7 @@
             input.addEventListener('change', function() {
                 if (this.name === 'base') {
                     osmLayer.setVisible(this.value === 'osm');
+                    updateTransparencyControl();
                 } else if (this.name === 'overlay') {
                     topo25Layer.setVisible(this.value === 'topo25');
                     census1910Layer.setVisible(this.value === 'census1910');
@@ -417,23 +422,41 @@
 
         var slider = document.getElementById('opacity-slider');
         var opacityValue = document.getElementById('opacity-value');
+        var transparencyGroup = document.getElementById('transparency-group');
         var OVERLAY_EXTENT = null;
-        var DEFAULT_OPACITY = 100;
+        var lastOpacity = 100;
+
+        // Transparency only makes sense over the OSM base map. With the base off,
+        // hide the slider and show the overlay fully opaque; restore the last value
+        // when the base map comes back.
+        function updateTransparencyControl() {
+            if (osmLayer.getVisible()) {
+                transparencyGroup.classList.remove('hidden');
+                slider.value = lastOpacity;
+                opacityValue.textContent = lastOpacity + '%';
+                setMapOpacity(lastOpacity / 100);
+            } else {
+                transparencyGroup.classList.add('hidden');
+                setMapOpacity(1);
+            }
+        }
 
         slider.addEventListener('input', function() {
-            var val = parseInt(this.value);
-            setMapOpacity(val / 100);
-            opacityValue.textContent = val + '%';
+            lastOpacity = parseInt(this.value);
+            setMapOpacity(lastOpacity / 100);
+            opacityValue.textContent = lastOpacity + '%';
         });
 
+        // Fit the view to the currently selected overlay's extent.
         document.getElementById('reset-btn').addEventListener('click', function() {
-            slider.value = DEFAULT_OPACITY;
-            opacityValue.textContent = DEFAULT_OPACITY + '%';
-            setMapOpacity(DEFAULT_OPACITY / 100);
-            if (OVERLAY_EXTENT) {
-                map.getView().fit(OVERLAY_EXTENT, { padding: [20, 20, 20, 20], duration: 400 });
+            var layer = getActiveMapLayer();
+            var extent = (layer && layer.getExtent()) || OVERLAY_EXTENT;
+            if (extent) {
+                map.getView().fit(extent, { padding: [20, 20, 20, 20], duration: 400 });
             }
         });
+
+        updateTransparencyControl();
     </script>
 </body>
 </html>
