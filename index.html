@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Meßtischblatt 4670 Festenberg</title>
+    <title>Kreis Groß Wartenberg</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <meta http-equiv='imagetoolbar' content='no'/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -96,7 +96,6 @@
         /* LayerSwitcher dark theme */
         .layer-switcher { top: 10px; right: 10px; }
         .layer-switcher button {
-            display: none !important;
             background-color: #16213e !important;
             border: 1px solid #0f3460 !important;
             border-radius: 6px;
@@ -139,6 +138,11 @@
             top: 50%;
             transform: translateY(-50%);
         }
+        .layer-switcher .panel > ul > li.group:last-child {
+            border-top: 1px solid #0f3460;
+            margin-top: 6px;
+            padding-top: 2px;
+        }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.css" type="text/css">
     <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.js"></script>
@@ -146,26 +150,40 @@
     <link rel="stylesheet" href="https://unpkg.com/ol-layerswitcher@4.1.1/src/ol-layerswitcher.css" />
 </head>
 <body>
-    <div id="header"><h1><span>Meßtischblatt</span> 4670 Festenberg</h1></div>
+    <div id="header"><h1><span>Meßtischblätter</span> Kreis Groß Wartenberg</h1></div>
     <div id="map" class="map">
         <div id="opacity-control">
             <label for="opacity-slider">Transparenz</label>
-            <input id="opacity-slider" type="range" min="0" max="100" value="70">
-            <span id="opacity-value">70%</span>
+            <input id="opacity-slider" type="range" min="0" max="100" value="100">
+            <span id="opacity-value">100%</span>
             <button id="reset-btn">Reset</button>
         </div>
     </div>
     <div id="footer">
-        Topographische Karte 4670 = 2708. Festenberg, 1:25&thinsp;000, 1938 &mdash; Kartensammlung Herder-Institut, Signatur K 3 II L 58 &mdash; <a href="https://dbs.herder-institut.de/karten/id/K3IIL58:4670" target="_blank">dbs.herder-institut.de</a>
+        Topographische Karten 1:25&thinsp;000 (Meßtischblätter), Kreis Groß Wartenberg, ca. 1938 &mdash; Kartensammlung Herder-Institut &mdash; <a href="https://www.herder-institut.de/" target="_blank">herder-institut.de</a>
     </div>
     <script type="text/javascript">
-        var overlayLayer = new ol.layer.Tile({
-            opacity: 0.7,
+        var topo25Layer = new ol.layer.Tile({
+            title: 'Messtischblätter (Topo25) - 1937-1940, 1:25.000',
+            visible: true,
+            opacity: 1.0,
             source: new ol.source.XYZ({
                 attributions: '',
                 minZoom: 8,
                 maxZoom: 16,
-                url: './{z}/{x}/{y}.webp',
+                url: './tiles_topo25/{z}/{x}/{y}.webp',
+                tileSize: [256, 256]
+            })
+        });
+        var census1910Layer = new ol.layer.Tile({
+            title: 'Census 1910',
+            visible: false,
+            opacity: 1.0,
+            source: new ol.source.XYZ({
+                attributions: '',
+                minZoom: 8,
+                maxZoom: 16,
+                url: './tiles_census1910/{z}/{x}/{y}.webp',
                 tileSize: [256, 256]
             })
         });
@@ -184,6 +202,14 @@
                         }),
                     ]
                 }),
+                new ol.layer.Group({
+                    title: 'Demografische Karten',
+                    layers: [census1910Layer]
+                }),
+                new ol.layer.Group({
+                    title: 'Topografische Karten',
+                    layers: [topo25Layer]
+                }),
             ],
             view: new ol.View({
                 center: [1939316.7540431642, 6682934.4834087156],
@@ -191,14 +217,39 @@
                 maxZoom: 16,
             })
         });
-        map.addLayer(overlayLayer);
+
+        function getActiveMapLayer() {
+            return census1910Layer.getVisible() ? census1910Layer : topo25Layer;
+        }
+
+        function setMapOpacity(opacity) {
+            topo25Layer.setOpacity(opacity);
+            census1910Layer.setOpacity(opacity);
+        }
+
+        function enforceSingleMapLayer(selectedLayer, otherLayer) {
+            if (selectedLayer.getVisible()) {
+                otherLayer.setVisible(false);
+            } else if (!otherLayer.getVisible()) {
+                selectedLayer.setVisible(true);
+            }
+        }
+
+        topo25Layer.on('change:visible', function() {
+            enforceSingleMapLayer(topo25Layer, census1910Layer);
+        });
+        census1910Layer.on('change:visible', function() {
+            enforceSingleMapLayer(census1910Layer, topo25Layer);
+        });
 
         // Load extent from tiles-extent.json (regenerate with: python3 update-extent.py)
         fetch('./tiles-extent.json')
             .then(function(r) { return r.json(); })
             .then(function(meta) {
-                overlayLayer.setExtent(meta.extent);
-                overlayLayer.getSource().setProperties({ minZoom: meta.minZoom, maxZoom: meta.maxZoom });
+                topo25Layer.setExtent(meta.extent);
+                census1910Layer.setExtent(meta.extent);
+                topo25Layer.getSource().setProperties({ minZoom: meta.minZoom, maxZoom: meta.maxZoom });
+                census1910Layer.getSource().setProperties({ minZoom: meta.minZoom, maxZoom: meta.maxZoom });
                 map.getView().fit(meta.extent, { padding: [20, 20, 20, 20] });
                 OVERLAY_EXTENT = meta.extent;
             });
@@ -264,23 +315,26 @@
             }
         });
 
-        map.addControl(new ol.control.LayerSwitcher());
+        map.addControl(new ol.control.LayerSwitcher({
+            reverse: true,
+            groupSelectStyle: 'none'
+        }));
 
         var slider = document.getElementById('opacity-slider');
         var opacityValue = document.getElementById('opacity-value');
         var OVERLAY_EXTENT = null;
-        var DEFAULT_OPACITY = 70;
+        var DEFAULT_OPACITY = 100;
 
         slider.addEventListener('input', function() {
             var val = parseInt(this.value);
-            overlayLayer.setOpacity(val / 100);
+            setMapOpacity(val / 100);
             opacityValue.textContent = val + '%';
         });
 
         document.getElementById('reset-btn').addEventListener('click', function() {
             slider.value = DEFAULT_OPACITY;
             opacityValue.textContent = DEFAULT_OPACITY + '%';
-            overlayLayer.setOpacity(DEFAULT_OPACITY / 100);
+            setMapOpacity(DEFAULT_OPACITY / 100);
             if (OVERLAY_EXTENT) {
                 map.getView().fit(OVERLAY_EXTENT, { padding: [20, 20, 20, 20], duration: 400 });
             }
