@@ -151,9 +151,51 @@
             letter-spacing: 0.03em;
         }
         #layer-list label:hover { color: #4fc3f7; }
-        #layer-list input[type="radio"] { accent-color: #4fc3f7; cursor: pointer; }
+        #layer-list input[type="radio"],
+        #layer-list input[type="checkbox"] { accent-color: #4fc3f7; cursor: pointer; }
         @media (max-width: 768px) {
             #layer-toggle { width: 44px; height: 44px; font-size: 24px; line-height: 42px; }
+        }
+
+        /* City labels (modern pill with pin) */
+        .city-label {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 11px 3px 8px;
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(79, 195, 247, 0.45);
+            border-radius: 999px;
+            color: #eceff1;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+            pointer-events: none;
+            user-select: none;
+            transform: translateY(-6px);
+        }
+        .city-label::before {
+            content: '';
+            flex: none;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            box-shadow: 0 0 6px rgba(79, 195, 247, 0.9);
+        }
+        .city-label::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -5px;
+            transform: translateX(-50%);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid rgba(26, 26, 46, 0.9);
         }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.css" type="text/css">
@@ -172,6 +214,10 @@
                 <div class="layer-group">
                     <div class="layer-group-title">Demografisch</div>
                     <label><input type="radio" name="overlay" value="census1910"> Census 1910</label>
+                </div>
+                <div class="layer-group">
+                    <div class="layer-group-title">Beschriftungen</div>
+                    <label><input type="checkbox" name="labels" value="cities" checked> Städte</label>
                 </div>
                 <div class="layer-group">
                     <div class="layer-group-title">Basiskarte</div>
@@ -327,6 +373,37 @@
                 }
             });
         });
+
+        // City labels (German/historical names) as modern pill overlays
+        var cityOverlays = [];
+        var citiesCheckbox = document.querySelector('#layer-panel input[name="labels"]');
+
+        function applyCityVisibility() {
+            var show = citiesCheckbox.checked;
+            cityOverlays.forEach(function(o) {
+                o.getElement().style.display = show ? '' : 'none';
+            });
+        }
+        citiesCheckbox.addEventListener('change', applyCityVisibility);
+
+        fetch('./cities.json')
+            .then(function(r) { return r.json(); })
+            .then(function(cities) {
+                cities.forEach(function(city) {
+                    var el = document.createElement('div');
+                    el.className = 'city-label';
+                    el.textContent = city.historical_name;
+                    var overlay = new ol.Overlay({
+                        element: el,
+                        position: ol.proj.fromLonLat([city.lon, city.lat]),
+                        positioning: 'bottom-center',
+                        stopEvent: false
+                    });
+                    map.addOverlay(overlay);
+                    cityOverlays.push(overlay);
+                });
+                applyCityVisibility();
+            });
 
         var slider = document.getElementById('opacity-slider');
         var opacityValue = document.getElementById('opacity-value');
