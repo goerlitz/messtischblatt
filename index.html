@@ -125,7 +125,7 @@
             box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
         }
         #legend .legend-line.kreis { border-top-color: #5aa0c4; }
-        #legend .legend-line.landes { border-top: 3px dashed #9c6fb0; }
+        #legend .legend-line.landes { border-top: 3px dashed #d267a6; }
         #transparency-group .transparency-row { display: flex; align-items: center; gap: 8px; }
         #transparency-group.hidden { display: none; }
         #opacity-slider {
@@ -155,6 +155,7 @@
             transition: background-color 0.2s, border-color 0.2s, color 0.2s;
         }
         .map-btn:hover { background-color: #0f3460; border-color: #4fc3f7; color: #4fc3f7; }
+        .map-btn svg { display: block; }
         #map-controls {
             position: absolute;
             top: 10px;
@@ -288,7 +289,7 @@
                     <label><input type="radio" name="overlay" value="census1910"> <span class="layer-name">Nationalitätenkarte<small>Volkszählung 1910 · 1:500.000</small></span></label>
                 </div>
                 <div class="layer-group">
-                    <div class="layer-group-title">Beschriftungen</div>
+                    <div class="layer-group-title">Orte</div>
                     <label><input type="checkbox" name="labels" value="cities" checked> Städte</label>
                 </div>
                 <div class="layer-group">
@@ -311,7 +312,7 @@
                 <button id="zoom-in" class="map-btn" title="Vergrößern">+</button>
                 <button id="zoom-out" class="map-btn" title="Verkleinern">&#8722;</button>
             </div>
-            <button id="fit-btn" class="map-btn" title="Auf das Kartengebiet einpassen">&#10530;</button>
+            <button id="fit-btn" class="map-btn" title="Auf das Kartengebiet einpassen"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 0-1-1h-4"/><path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/></svg></button>
         </div>
         <div id="legend">
             <div class="legend-row"><span class="legend-line kreis"></span>Kreisgrenze</div>
@@ -449,10 +450,10 @@
                 }),
                 new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                        color: '#9c6fb0',
-                        width: 2.2,
-                        lineDash: [8, 5],
-                        lineCap: 'butt'
+                        color: '#d267a6',
+                        width: 2.4,
+                        lineDash: [10, 5, 1, 5],
+                        lineCap: 'round'
                     })
                 })
             ]
@@ -505,10 +506,10 @@
         }
         citiesCheckbox.addEventListener('change', applyCityVisibility);
 
-        // Fade labels out between zoom 14 and 15 — close enough to read the map itself
+        // Fade labels out between zoom 13 and 14 — close enough to read the map itself
         function applyCityZoomFade() {
             var zoom = map.getView().getZoom();
-            var opacity = 1 - Math.min(Math.max((zoom - 14) / (15 - 14), 0), 1);
+            var opacity = 1 - Math.min(Math.max((zoom - 13) / (14 - 13), 0), 1);
             cityOverlays.forEach(function(o) {
                 o.getElement().style.opacity = opacity;
             });
