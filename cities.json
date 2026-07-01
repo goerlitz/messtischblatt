@@ -8,13 +8,67 @@
   {
     "historical_name": "Groß Wartenberg",
     "modern_name": "Syców",
-    "lat": 51.3070,
-    "lon": 17.7198
+    "lat": 51.3079,
+    "lon": 17.7202
   },
   {
     "historical_name": "Neumittelwalde",
     "modern_name": "Międzybórz",
-    "lat": 51.3963,
+    "lat": 51.3992,
     "lon": 17.6656
+  },
+  {
+    "historical_name": "Oels",
+    "modern_name": "Oleśnica",
+    "lat": 51.2134,
+    "lon": 17.3899
+  },
+  {
+    "historical_name": "Bernstadt",
+    "modern_name": "Bierutów",
+    "lat": 51.1253,
+    "lon": 17.5400
+  },
+  {
+    "historical_name": "Militsch",
+    "modern_name": "Milicz",
+    "lat": 51.5277,
+    "lon": 17.2714
+  },
+  {
+    "historical_name": "Reichthal",
+    "modern_name": "Rychtal",
+    "lat": 51.1500,
+    "lon": 17.8500
+  },
+  {
+    "historical_name": "Namslau",
+    "modern_name": "Namysłów",
+    "lat": 51.0759,
+    "lon": 17.7224
+  },
+  {
+    "historical_name": "Kempen",
+    "modern_name": "Kępno",
+    "lat": 51.2781,
+    "lon": 17.9891
+  },
+  {
+    "historical_name": "Schildberg",
+    "modern_name": "Ostrzeszów",
+    "lat": 51.4258,
+    "lon": 17.9338
+  },
+  {
+    "historical_name": "Adelnau",
+    "modern_name": "Odolanów",
+    "lat": 51.5747,
+    "lon": 17.6744
+  },
+  {
+    "historical_name": "Ostrowo",
+    "modern_name": "Ostrów Wielkopolski",
+    "lat": 51.6550,
+    "lon": 17.8061
   }
 ]
