@@ -223,6 +223,7 @@
                 <div class="layer-group">
                     <div class="layer-group-title">Basiskarte</div>
                     <label><input type="radio" name="base" value="osm" checked> OpenStreetMap</label>
+                    <label><input type="radio" name="base" value="esri"> Esri World Imagery</label>
                     <label><input type="radio" name="base" value="off"> Aus</label>
                 </div>
             </div>
@@ -269,10 +270,19 @@
             visible: true,
             source: new ol.source.OSM()
         });
+        var esriLayer = new ol.layer.Tile({
+            title: 'Esri World Imagery',
+            visible: false,
+            source: new ol.source.XYZ({
+                attributions: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+                maxZoom: 19,
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+            })
+        });
         var map = new ol.Map({
             controls: ol.control.defaults.defaults(),
             target: 'map',
-            layers: [osmLayer, census1910Layer, topo25Layer],
+            layers: [osmLayer, esriLayer, census1910Layer, topo25Layer],
             view: new ol.View({
                 center: [1939316.7540431642, 6682934.4834087156],
                 zoom: 12,
@@ -370,6 +380,7 @@
             input.addEventListener('change', function() {
                 if (this.name === 'base') {
                     osmLayer.setVisible(this.value === 'osm');
+                    esriLayer.setVisible(this.value === 'esri');
                     updateTransparencyControl();
                 } else if (this.name === 'overlay') {
                     topo25Layer.setVisible(this.value === 'topo25');
@@ -430,7 +441,7 @@
         // hide the slider and show the overlay fully opaque; restore the last value
         // when the base map comes back.
         function updateTransparencyControl() {
-            if (osmLayer.getVisible()) {
+            if (osmLayer.getVisible() || esriLayer.getVisible()) {
                 transparencyGroup.classList.remove('hidden');
                 slider.value = lastOpacity;
                 opacityValue.textContent = lastOpacity + '%';
