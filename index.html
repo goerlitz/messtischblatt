@@ -394,6 +394,7 @@
         function setMapOpacity(opacity) {
             topo25Layer.setOpacity(opacity);
             census1910Layer.setOpacity(opacity);
+            if (topoOutlineLayer) topoOutlineLayer.setOpacity(opacity);
         }
 
         // --- URL permalink: reflect base/overlay/center/zoom in the location hash ---
@@ -444,6 +445,32 @@
                 }
                 OVERLAY_EXTENT = meta.extent;
             });
+
+        // Outline + soft shadow around the topo25 sheet for better contrast with the
+        // background / base map (footprint from extend_topo25.geojson, EPSG:3857).
+        // Only shown while the topo25 overlay is the active one.
+        var topoOutlineLayer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                url: './extend_topo25.geojson',
+                format: new ol.format.GeoJSON({
+                    dataProjection: 'EPSG:3857',
+                    featureProjection: 'EPSG:3857'
+                })
+            }),
+            visible: topo25Layer.getVisible(),
+            style: [
+                new ol.style.Style({
+                    stroke: new ol.style.Stroke({ color: 'rgba(0, 0, 0, 0.35)', width: 7 })
+                }),
+                new ol.style.Style({
+                    stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 0.5)', width: 1.5 })
+                })
+            ]
+        });
+        map.addLayer(topoOutlineLayer);
+        topo25Layer.on('change:visible', function() {
+            topoOutlineLayer.setVisible(topo25Layer.getVisible());
+        });
 
         var kreisLayer = new ol.layer.Vector({
             source: new ol.source.Vector({
