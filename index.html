@@ -8,9 +8,10 @@
     <style type="text/css">
         *, *::before, *::after { box-sizing: border-box; }
         html, body { overflow: hidden; padding: 0; margin: 0; height: 100%; width: 100%; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #1a1a2e; }
-        #header { height: 52px; display: flex; align-items: center; justify-content: center; padding: 0 20px; background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%); border-bottom: 1px solid #0f3460; }
-        #header h1 { margin: 0; font-size: 18px; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: #b0bec5; text-align: center; }
+        #header { height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 0 20px; background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%); border-bottom: 1px solid #0f3460; }
+        #header h1 { margin: 0; font-size: 18px; line-height: 1; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: #b0bec5; text-align: center; }
         #header h1 span { color: #4fc3f7; font-weight: 700; letter-spacing: 0.08em; }
+        #header .subtitle { margin: 2px; font-size: 11px; line-height: 1; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #6e8090; }
         #map { height: calc(100% - 52px - 32px); position: relative; }
         #footer {
             height: 32px;
@@ -203,7 +204,10 @@
     <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.js"></script>
 </head>
 <body>
-    <div id="header"><h1><span>Meßtischblätter</span> Kreis Groß Wartenberg</h1></div>
+    <div id="header">
+        <h1>Kreis <span>Gross Wartenberg</span></h1>
+        <p class="subtitle">Historische Karten</p>
+    </div>
     <div id="map" class="map">
         <div id="layer-panel">
             <button id="layer-toggle" title="Ebenen">&#9636;</button>
@@ -214,7 +218,7 @@
                 </div>
                 <div class="layer-group">
                     <div class="layer-group-title">Demografisch</div>
-                    <label><input type="radio" name="overlay" value="census1910"> Census 1910</label>
+                    <label><input type="radio" name="overlay" value="census1910"> <span class="layer-name">Nationalitätenkarte<small>Volkszählung 1910 · 1:500.000</small></span></label>
                 </div>
                 <div class="layer-group">
                     <div class="layer-group-title">Beschriftungen</div>
@@ -238,7 +242,7 @@
         </div>
     </div>
     <div id="footer">
-        Topographische Karten 1:25&thinsp;000 (Meßtischblätter), Kreis Groß Wartenberg, ca. 1938 &mdash; Kartensammlung Herder-Institut &mdash; <a href="https://www.herder-institut.de/" target="_blank">herder-institut.de</a>
+        Meßtischblätter 1937&ndash;1940, 1:25&thinsp;000 &mdash; Kartensammlung Herder-Institut (<a href="https://www.herder-institut.de/" target="_blank">herder-institut.de</a>) &amp; Staatsarchiv Posen
     </div>
     <script type="text/javascript">
         var topo25Layer = new ol.layer.Tile({
@@ -254,7 +258,7 @@
             })
         });
         var census1910Layer = new ol.layer.Tile({
-            title: 'Census 1910',
+            title: 'Nationalitätenkarte — Volkszählung 1910, 1:500.000',
             visible: false,
             opacity: 1.0,
             source: new ol.source.XYZ({
@@ -385,6 +389,7 @@
                 } else if (this.name === 'overlay') {
                     topo25Layer.setVisible(this.value === 'topo25');
                     census1910Layer.setVisible(this.value === 'census1910');
+                    updateFooter();
                 }
             });
         });
@@ -452,6 +457,16 @@
             }
         }
 
+        // Source attribution shown in the footer for the currently selected overlay.
+        var FOOTER_SOURCES = {
+            topo25: 'Meßtischblätter 1937&ndash;1940, 1:25&thinsp;000 &mdash; Kartensammlung Herder-Institut (<a href="https://www.herder-institut.de/" target="_blank">herder-institut.de</a>) &amp; Staatsarchiv Posen',
+            census1910: 'Nationalitätenkarte, Volkszählung 1910, 1:500&thinsp;000 &mdash; Wikipedia / Universitätsbibliothek in Wrocław'
+        };
+        function updateFooter() {
+            var overlay = document.querySelector('#layer-panel input[name="overlay"]:checked');
+            document.getElementById('footer').innerHTML = (overlay && FOOTER_SOURCES[overlay.value]) || '';
+        }
+
         slider.addEventListener('input', function() {
             lastOpacity = parseInt(this.value);
             setMapOpacity(lastOpacity / 100);
@@ -468,6 +483,7 @@
         });
 
         updateTransparencyControl();
+        updateFooter();
     </script>
 </body>
 </html>
