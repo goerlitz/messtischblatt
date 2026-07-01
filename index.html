@@ -396,6 +396,41 @@
             census1910Layer.setOpacity(opacity);
         }
 
+        // --- URL permalink: reflect base/overlay/center/zoom in the location hash ---
+        var restoredFromUrl = false;
+
+        function readHash() {
+            var out = { z: null, lat: null, lon: null, base: null, overlay: null };
+            var params = new URLSearchParams(location.hash.replace(/^#/, ''));
+            var z = parseFloat(params.get('z'));
+            var lat = parseFloat(params.get('lat'));
+            var lon = parseFloat(params.get('lon'));
+            if (isFinite(z)) out.z = z;
+            if (isFinite(lat) && isFinite(lon)) { out.lat = lat; out.lon = lon; }
+            var base = params.get('base');
+            if (base === 'osm' || base === 'esri' || base === 'off') out.base = base;
+            var overlay = params.get('overlay');
+            if (overlay === 'topo25' || overlay === 'census1910') out.overlay = overlay;
+            return out;
+        }
+
+        function updateHash() {
+            var view = map.getView();
+            var center = view.getCenter();
+            var zoom = view.getZoom();
+            if (!center || zoom == null) return;
+            var lonLat = ol.proj.toLonLat(center);
+            var base = document.querySelector('#layer-panel input[name="base"]:checked');
+            var overlay = document.querySelector('#layer-panel input[name="overlay"]:checked');
+            var params = new URLSearchParams();
+            params.set('z', zoom.toFixed(2));
+            params.set('lat', lonLat[1].toFixed(5));
+            params.set('lon', lonLat[0].toFixed(5));
+            if (base) params.set('base', base.value);
+            if (overlay) params.set('overlay', overlay.value);
+            history.replaceState(null, '', '#' + params.toString());
+        }
+
         // Load extent from tiles-extent.json (regenerate with: python3 update-extent.py)
         fetch('./tiles-extent.json')
             .then(function(r) { return r.json(); })
@@ -404,7 +439,9 @@
                 census1910Layer.setExtent(meta.extent);
                 topo25Layer.getSource().setProperties({ minZoom: meta.minZoom, maxZoom: meta.maxZoom });
                 census1910Layer.getSource().setProperties({ minZoom: meta.minZoom, maxZoom: meta.maxZoom });
-                map.getView().fit(meta.extent, { padding: [20, 20, 20, 20] });
+                if (!restoredFromUrl) {
+                    map.getView().fit(meta.extent, { padding: [20, 20, 20, 20] });
+                }
                 OVERLAY_EXTENT = meta.extent;
             });
 
@@ -463,9 +500,11 @@
         kreisLayer.getSource().once('change', function() {
             if (kreisLayer.getSource().getState() === 'ready') {
                 OVERLAY_EXTENT = kreisLayer.getSource().getExtent();
-                map.getView().fit(OVERLAY_EXTENT, {
-                    padding: [20, 20, 20, 20]
-                });
+                if (!restoredFromUrl) {
+                    map.getView().fit(OVERLAY_EXTENT, {
+                        padding: [20, 20, 20, 20]
+                    });
+                }
             }
         });
 
@@ -487,6 +526,7 @@
                 // Close the menu after picking an overlay or base map
                 // (but not when toggling markers or adjusting transparency).
                 document.getElementById('layer-list').classList.remove('open');
+                updateHash();
             });
         });
 
@@ -610,8 +650,44 @@
             }
         });
 
-        updateTransparencyControl();
-        updateActiveSource();
+        // Apply base/overlay/center/zoom from a parsed hash state to the map + UI.
+        function applyState(s) {
+            if (s.base) {
+                var baseInput = document.querySelector('#layer-panel input[name="base"][value="' + s.base + '"]');
+                if (baseInput) baseInput.checked = true;
+                osmLayer.setVisible(s.base === 'osm');
+                esriLayer.setVisible(s.base === 'esri');
+            }
+            if (s.overlay) {
+                var overlayInput = document.querySelector('#layer-panel input[name="overlay"][value="' + s.overlay + '"]');
+                if (overlayInput) overlayInput.checked = true;
+                topo25Layer.setVisible(s.overlay === 'topo25');
+                census1910Layer.setVisible(s.overlay === 'census1910');
+            }
+            if (s.z != null && s.lat != null && s.lon != null) {
+                var view = map.getView();
+                view.setCenter(ol.proj.fromLonLat([s.lon, s.lat]));
+                view.setZoom(s.z);
+            }
+            updateTransparencyControl();
+            updateActiveSource();
+        }
+
+        // Initial restore from the URL hash (if present).
+        var initState = readHash();
+        if (initState.z != null && initState.lat != null && initState.lon != null) {
+            restoredFromUrl = true;
+        }
+        applyState(initState);
+
+        // React to manual hash edits / pasted links. Our own updateHash() uses
+        // replaceState, which does NOT fire hashchange — so no feedback loop.
+        window.addEventListener('hashchange', function() {
+            applyState(readHash());
+        });
+
+        // Keep the hash in sync with pan/zoom (fires once per interaction).
+        map.on('moveend', updateHash);
     </script>
 </body>
 </html>
