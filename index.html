@@ -40,13 +40,13 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(22, 33, 62, 0.85);
-            backdrop-filter: blur(6px);
+            background: rgba(22, 33, 62, 0.9);
+            backdrop-filter: blur(8px);
             border: 1px solid #0f3460;
             border-radius: 8px;
             padding: 8px 16px;
-            color: #e0e0e0;
-            font-size: 13px;
+            color: #b0bec5;
+            font-size: 12px;
         }
         #opacity-control.hidden { display: none; }
         #legend {
@@ -57,12 +57,12 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
-            background: rgba(22, 33, 62, 0.85);
-            backdrop-filter: blur(6px);
+            background: rgba(22, 33, 62, 0.9);
+            backdrop-filter: blur(8px);
             border: 1px solid #0f3460;
             border-radius: 8px;
             padding: 7px 11px;
-            font-size: 11px;
+            font-size: 12px;
             color: #b0bec5;
             letter-spacing: 0.03em;
         }
@@ -87,8 +87,8 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            background: rgba(22, 33, 62, 0.85);
-            backdrop-filter: blur(6px);
+            background: rgba(22, 33, 62, 0.9);
+            backdrop-filter: blur(8px);
             border: 1px solid #0f3460;
             border-radius: 8px;
             padding: 8px 14px;
@@ -145,9 +145,10 @@
             align-items: flex-end;
         }
         #layer-toggle {
-            background: #16213e;
+            background: rgba(22, 33, 62, 0.9);
+            backdrop-filter: blur(8px);
             border: 1px solid #0f3460;
-            border-radius: 6px;
+            border-radius: 8px;
             color: #b0bec5;
             font-size: 18px;
             width: 32px;
@@ -160,7 +161,7 @@
         #layer-list {
             display: none;
             margin-top: 4px;
-            background: rgba(22, 33, 62, 0.95);
+            background: rgba(22, 33, 62, 0.9);
             backdrop-filter: blur(8px);
             border: 1px solid #0f3460;
             border-radius: 8px;
@@ -214,9 +215,9 @@
             display: flex;
             align-items: center;
             padding: 4px 13px;
-            background: rgba(26, 26, 46, 0.62);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(79, 195, 247, 0.28);
+            background: rgba(22, 33, 62, 0.72);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(79, 195, 247, 0.3);
             border-radius: 999px;
             color: #f0f3f6;
             font-size: 11px;
@@ -237,7 +238,7 @@
             transform: translateX(-50%);
             border-left: 5px solid transparent;
             border-right: 5px solid transparent;
-            border-top: 6px solid rgba(26, 26, 46, 0.62);
+            border-top: 6px solid rgba(22, 33, 62, 0.72);
         }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@main/dist/en/v7.0.0/legacy/ol.css" type="text/css">
@@ -347,22 +348,6 @@
             census1910Layer.setOpacity(opacity);
         }
 
-        // Frame around the historical sheet so its edge reads as a bordered sheet
-        // rather than a hard cut across the base map (soft dark shadow + thin light rule).
-        var sheetBorderSource = new ol.source.Vector();
-        var sheetBorderLayer = new ol.layer.Vector({
-            source: sheetBorderSource,
-            style: [
-                new ol.style.Style({
-                    stroke: new ol.style.Stroke({ color: 'rgba(0, 0, 0, 0.28)', width: 3.5 })
-                }),
-                new ol.style.Style({
-                    stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 0.50)', width: 1.25 })
-                })
-            ]
-        });
-        map.addLayer(sheetBorderLayer);
-
         // Load extent from tiles-extent.json (regenerate with: python3 update-extent.py)
         fetch('./tiles-extent.json')
             .then(function(r) { return r.json(); })
@@ -371,7 +356,6 @@
                 census1910Layer.setExtent(meta.extent);
                 topo25Layer.getSource().setProperties({ minZoom: meta.minZoom, maxZoom: meta.maxZoom });
                 census1910Layer.getSource().setProperties({ minZoom: meta.minZoom, maxZoom: meta.maxZoom });
-                sheetBorderSource.addFeature(new ol.Feature(ol.geom.Polygon.fromExtent(meta.extent)));
                 map.getView().fit(meta.extent, { padding: [20, 20, 20, 20] });
                 OVERLAY_EXTENT = meta.extent;
             });
