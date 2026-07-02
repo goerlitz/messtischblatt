@@ -539,6 +539,12 @@
         document.getElementById('layer-toggle').addEventListener('click', function() {
             document.getElementById('layer-list').classList.toggle('open');
         });
+        // Close the layer menu when clicking outside the panel (not on selections).
+        document.addEventListener('click', function(e) {
+            if (!document.getElementById('layer-panel').contains(e.target)) {
+                document.getElementById('layer-list').classList.remove('open');
+            }
+        });
         document.querySelectorAll('#layer-panel input[type="radio"]').forEach(function(input) {
             input.addEventListener('change', function() {
                 if (this.name === 'base') {
@@ -550,9 +556,6 @@
                     census1910Layer.setVisible(this.value === 'census1910');
                     updateActiveSource();
                 }
-                // Close the menu after picking an overlay or base map
-                // (but not when toggling markers or adjusting transparency).
-                document.getElementById('layer-list').classList.remove('open');
                 updateHash();
             });
         });
